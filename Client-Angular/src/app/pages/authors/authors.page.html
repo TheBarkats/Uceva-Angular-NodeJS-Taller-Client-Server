@@ -1,0 +1,50 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>✍️ Autores</h1>
+      <p class="text-muted">Catálogo de autores de la biblioteca</p>
+    </div>
+  </div>
+
+  <!-- Estados de carga y error -->
+  <app-alert
+    *ngIf="state === 'loading'"
+    type="info"
+    message="Cargando autores..."
+  ></app-alert>
+
+  <app-alert
+    *ngIf="state === 'error'"
+    type="danger"
+    message="Error al cargar los autores. Por favor, intenta nuevamente."
+  ></app-alert>
+
+  <!-- Tabla de autores -->
+  <div *ngIf="state === 'success'" class="row mt-4">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Nacionalidad</th>
+              <th>Fecha de Nacimiento</th>
+              <th>Biografía</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let author of authors; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><strong>{{ author.name }}</strong></td>
+              <td>{{ author.nationality }}</td>
+              <td>{{ formatDate(author.birthDate) }}</td>
+              <td class="text-truncate" title="{{ author.biography }}">{{ author.biography }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted mt-3">Total de autores: <strong>{{ authors.length }}</strong></p>
+    </div>
+  </div>
+</div>

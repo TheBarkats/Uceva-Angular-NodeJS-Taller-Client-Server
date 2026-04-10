@@ -1,0 +1,65 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1>🏷️ Categorías</h1>
+      <p class="text-muted">Clasificaciones disponibles en la biblioteca</p>
+    </div>
+  </div>
+
+  <!-- Estados de carga y error -->
+  <app-alert
+    *ngIf="state === 'loading'"
+    type="info"
+    message="Cargando categorías..."
+  ></app-alert>
+
+  <app-alert
+    *ngIf="state === 'error'"
+    type="danger"
+    message="Error al cargar las categorías. Por favor, intenta nuevamente."
+  ></app-alert>
+
+  <!-- Cards de categorías -->
+  <div *ngIf="state === 'success'" class="row mt-4 g-3">
+    <div *ngFor="let category of categories; let i = index" class="col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm hover-effect">
+        <div class="card-header bg-primary text-white">
+          <h5 class="card-title mb-0">{{ category.name }}</h5>
+        </div>
+        <div class="card-body">
+          <p class="card-text text-muted">{{ category.description }}</p>
+          <div class="d-flex align-items-center">
+            <span class="badge bg-info">{{ category.icon }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla alternativa -->
+  <div *ngIf="state === 'success'" class="row mt-4">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Nombre</th>
+              <th>Descripción</th>
+              <th>Icono</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let category of categories; let i = index">
+              <td>{{ i + 1 }}</td>
+              <td><strong>{{ category.name }}</strong></td>
+              <td class="text-truncate" title="{{ category.description }}">{{ category.description }}</td>
+              <td><span class="badge bg-secondary">{{ category.icon }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="text-muted mt-3">Total de categorías: <strong>{{ categories.length }}</strong></p>
+    </div>
+  </div>
+</div>
