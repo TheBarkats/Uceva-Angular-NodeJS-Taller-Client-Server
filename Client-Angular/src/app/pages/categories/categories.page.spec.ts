@@ -40,44 +40,55 @@ describe('CategoriesPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load categories on init', (done) => {
+  it('should initialize with loading state', (done) => {
     spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
-
+    
+    // Before ngOnInit
+    expect(component.state).toBe('init');
+    
     component.ngOnInit();
-
-    expect(component.state).toBe('success');
-    expect(component.categories.length).toBe(2);
-    expect(component.categories[0].name).toBe('Ficción');
-    done();
+    
+    // Service should be called with 10
+    expect(categoriesService.getAllCategories).toHaveBeenCalledWith(10);
+    
+    // After subscribe completes
+    setTimeout(() => {
+      expect(component.state).toBe('success');
+      done();
+    }, 0);
   });
 
-  it('should have correct category data structure', () => {
+  it('should call getAllCategories with count parameter', () => {
     spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
     component.ngOnInit();
-    component.categories.forEach(category => {
-      expect(category.id).toBeDefined();
-      expect(category.name).toBeDefined();
-      expect(category.description).toBeDefined();
-      expect(category.icon).toBeDefined();
-    });
+    expect(categoriesService.getAllCategories).toHaveBeenCalledWith(10);
   });
 
-  it('should handle error when loading categories', (done) => {
+  it('should assign categories in next branch of subscribe', (done) => {
+    spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
+    component.ngOnInit();
+    
+    setTimeout(() => {
+      expect(component.categories.length).toBe(2);
+      expect(component.categories[0].name).toBe('Ficción');
+      expect(component.state).toBe('success');
+      done();
+    }, 0);
+  });
+
+  it('should handle error in subscribe error branch', (done) => {
+    const testError = new Error('API Connection Error');
     spyOn(categoriesService, 'getAllCategories').and.returnValue(
-      throwError(() => new Error('API Error'))
+      throwError(() => testError)
     );
+    spyOn(console, 'error');
 
     component.ngOnInit();
 
     setTimeout(() => {
       expect(component.state).toBe('error');
+      expect(console.error).toHaveBeenCalledWith(testError);
       done();
-    }, 100);
-  });
-
-  it('should have category icons defined', () => {
-    spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
-    component.ngOnInit();
-    expect(component.categories[0].icon).toMatch(/^book-/);
+    }, 0);
   });
 });

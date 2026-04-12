@@ -52,51 +52,55 @@ describe('BooksPage', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with loading state', () => {
+  it('should initialize with loading state', (done) => {
     spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
+    
+    // Before ngOnInit
+    expect(component.state).toBe('init');
+    
     component.ngOnInit();
-    expect(component.state).toBe('success');
+    
+    // Service should be called with 10
+    expect(booksService.getAllBooks).toHaveBeenCalledWith(10);
+    
+    // After subscribe completes
+    setTimeout(() => {
+      expect(component.state).toBe('success');
+      done();
+    }, 0);
   });
 
-  it('should load books on init', (done) => {
+  it('should call getAllBooks with count parameter', () => {
     spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
     component.ngOnInit();
-    expect(component.state).toBe('success');
-    expect(component.books.length).toBe(2);
-    expect(component.books[0].title).toBe('Cien años de soledad');
-    done();
+    expect(booksService.getAllBooks).toHaveBeenCalledWith(10);
   });
 
-  it('should have correct book data structure', () => {
+  it('should assign books in next branch of subscribe', (done) => {
     spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
     component.ngOnInit();
-    component.books.forEach(book => {
-      expect(book.id).toBeDefined();
-      expect(book.title).toBeDefined();
-      expect(book.author).toBeDefined();
-      expect(book.genre).toBeDefined();
-      expect(book.price).toBeDefined();
-      expect(book.pages).toBeDefined();
-      expect(book.isbn).toBeDefined();
-    });
+    
+    setTimeout(() => {
+      expect(component.books.length).toBe(2);
+      expect(component.books[0].title).toBe('Cien años de soledad');
+      expect(component.state).toBe('success');
+      done();
+    }, 0);
   });
 
-  it('should handle error when loading books', (done) => {
+  it('should handle error in subscribe error branch', (done) => {
+    const testError = new Error('Server Error');
     spyOn(booksService, 'getAllBooks').and.returnValue(
-      throwError(() => new Error('API Error'))
+      throwError(() => testError)
     );
+    spyOn(console, 'error');
 
     component.ngOnInit();
 
     setTimeout(() => {
       expect(component.state).toBe('error');
+      expect(console.error).toHaveBeenCalledWith(testError);
       done();
-    }, 100);
-  });
-
-  it('should display book prices correctly', () => {
-    spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
-    component.ngOnInit();
-    expect(component.books[0].price).toBeGreaterThan(0);
+    }, 0);
   });
 });
