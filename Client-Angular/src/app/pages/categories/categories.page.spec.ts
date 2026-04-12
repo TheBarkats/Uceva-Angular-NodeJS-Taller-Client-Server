@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { CategoriesPage } from './categories.page';
 import { CategoriesService } from '../../services/categories/categories.service';
 import { of, throwError } from 'rxjs';
@@ -26,7 +27,7 @@ describe('CategoriesPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [CategoriesPage],
+      imports: [CategoriesPage, HttpClientTestingModule],
       providers: [CategoriesService]
     }).compileComponents();
 
@@ -50,6 +51,17 @@ describe('CategoriesPage', () => {
     done();
   });
 
+  it('should have correct category data structure', () => {
+    spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
+    component.ngOnInit();
+    component.categories.forEach(category => {
+      expect(category.id).toBeDefined();
+      expect(category.name).toBeDefined();
+      expect(category.description).toBeDefined();
+      expect(category.icon).toBeDefined();
+    });
+  });
+
   it('should handle error when loading categories', (done) => {
     spyOn(categoriesService, 'getAllCategories').and.returnValue(
       throwError(() => new Error('API Error'))
@@ -61,5 +73,11 @@ describe('CategoriesPage', () => {
       expect(component.state).toBe('error');
       done();
     }, 100);
+  });
+
+  it('should have category icons defined', () => {
+    spyOn(categoriesService, 'getAllCategories').and.returnValue(of(mockCategories));
+    component.ngOnInit();
+    expect(component.categories[0].icon).toMatch(/^book-/);
   });
 });

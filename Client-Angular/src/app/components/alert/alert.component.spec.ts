@@ -1,5 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { AlertComponent } from './alert.component';
 
 describe('AlertComponent', () => {
@@ -14,19 +13,22 @@ describe('AlertComponent', () => {
 
     fixture = TestBed.createComponent(AlertComponent);
     component = fixture.componentInstance;
+    // Set required input BEFORE detectChanges
+    component.alertState = 'loading';
     fixture.detectChanges();
   });
 
   it('debería crearse correctamente', () => {
-    component.alertState = 'loading';
-    fixture.detectChanges();
     expect(component).toBeTruthy();
   });
 
   it('debería tener el texto vacío por defecto', () => {
-    component.alertState = 'loading';
-    fixture.detectChanges();
     expect(component.text).toBe('');
+  });
+
+  it('debería permitir asignar texto', () => {
+    component.text = 'Mensaje de prueba';
+    expect(component.text).toBe('Mensaje de prueba');
   });
 
   it('debería aplicar la clase correcta cuando el estado es "loading"', () => {
@@ -48,6 +50,14 @@ describe('AlertComponent', () => {
     expect(map['loading']).toBe('primary');
     expect(map['error']).toBe('danger');
   });
+
+  it('debería cambiar de estado correctamente', () => {
+    component.alertState = 'error';
+    expect(component.alertState).toBe('error');
+    component.alertState = 'loading';
+    expect(component.alertState).toBe('loading');
+  });
+});
 
   it('debería renderizar el texto recibido por input en loading', () => {
     component.alertState = 'loading';

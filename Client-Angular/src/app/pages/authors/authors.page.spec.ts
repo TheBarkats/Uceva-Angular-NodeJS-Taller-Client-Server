@@ -1,7 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { AuthorsPage } from './authors.page';
 import { AuthorsService } from '../../services/authors/authors.service';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { Author } from '../../interfaces/authors.interface';
 
 describe('AuthorsPage', () => {
@@ -28,7 +29,7 @@ describe('AuthorsPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AuthorsPage],
+      imports: [AuthorsPage, HttpClientTestingModule],
       providers: [AuthorsService]
     }).compileComponents();
 
@@ -52,10 +53,42 @@ describe('AuthorsPage', () => {
     done();
   });
 
+  it('should have correct author data structure', () => {
+    spyOn(authorsService, 'getAllAuthors').and.returnValue(of(mockAuthors));
+    component.ngOnInit();
+    component.authors.forEach(author => {
+      expect(author.id).toBeDefined();
+      expect(author.name).toBeDefined();
+      expect(author.nationality).toBeDefined();
+      expect(author.birthDate).toBeDefined();
+      expect(author.biography).toBeDefined();
+    });
+  });
+
   it('should format date correctly', () => {
-    const timestamp = 467587200; // Some date
+    const timestamp = 467587200;
     const formatted = component.formatDate(timestamp);
     expect(formatted).toBeTruthy();
     expect(typeof formatted).toBe('string');
+  });
+
+  it('should handle error when loading authors', (done) => {
+    spyOn(authorsService, 'getAllAuthors').and.returnValue(
+      throwError(() => new Error('API Error'))
+    );
+
+    component.ngOnInit();
+
+    setTimeout(() => {
+      expect(component.state).toBe('error');
+      done();
+    }, 100);
+  });
+
+  it('should display author nationality', () => {
+    spyOn(authorsService, 'getAllAuthors').and.returnValue(of(mockAuthors));
+    component.ngOnInit();
+    expect(component.authors[0].nationality).toBe('Colombiano');
+    expect(component.authors[1].nationality).toBe('Español');
   });
 });

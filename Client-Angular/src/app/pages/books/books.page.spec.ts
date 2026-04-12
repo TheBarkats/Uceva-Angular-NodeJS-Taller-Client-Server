@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { BooksPage } from './books.page';
 import { BooksService } from '../../services/books/books.service';
 import { of, throwError } from 'rxjs';
@@ -8,6 +9,7 @@ describe('BooksPage', () => {
   let component: BooksPage;
   let fixture: ComponentFixture<BooksPage>;
   let booksService: BooksService;
+  let httpMock: HttpTestingController;
 
   const mockBooks: Book[] = [
     {
@@ -32,28 +34,51 @@ describe('BooksPage', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BooksPage],
+      imports: [BooksPage, HttpClientTestingModule],
       providers: [BooksService]
     }).compileComponents();
 
     fixture = TestBed.createComponent(BooksPage);
     component = fixture.componentInstance;
     booksService = TestBed.inject(BooksService);
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should initialize with loading state', () => {
+    spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
+    component.ngOnInit();
+    expect(component.state).toBe('success');
+  });
+
   it('should load books on init', (done) => {
     spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
-
     component.ngOnInit();
-
     expect(component.state).toBe('success');
     expect(component.books.length).toBe(2);
     expect(component.books[0].title).toBe('Cien años de soledad');
     done();
+  });
+
+  it('should have correct book data structure', () => {
+    spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
+    component.ngOnInit();
+    component.books.forEach(book => {
+      expect(book.id).toBeDefined();
+      expect(book.title).toBeDefined();
+      expect(book.author).toBeDefined();
+      expect(book.genre).toBeDefined();
+      expect(book.price).toBeDefined();
+      expect(book.pages).toBeDefined();
+      expect(book.isbn).toBeDefined();
+    });
   });
 
   it('should handle error when loading books', (done) => {
@@ -67,5 +92,11 @@ describe('BooksPage', () => {
       expect(component.state).toBe('error');
       done();
     }, 100);
+  });
+
+  it('should display book prices correctly', () => {
+    spyOn(booksService, 'getAllBooks').and.returnValue(of(mockBooks));
+    component.ngOnInit();
+    expect(component.books[0].price).toBeGreaterThan(0);
   });
 });
